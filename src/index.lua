@@ -72,7 +72,7 @@ function Eurus:ReadGenv(name)
 end
 
 function Eurus:AddCommand(Name, Aliases, Info, Code)
-    Commands[Name] = {
+    Eurus.Commands[Name] = {
         Aliases = Aliases;
         Info = Info;
         Run = Code;
@@ -92,10 +92,10 @@ function Eurus:Chat(Text, WhisperTo)
 end
 
 Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
-    if not string.sub(Msg,1,string.len(ScriptData.Prefix))==ScriptData.Prefix then return end;
+    if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
     local function CmdCheck(Name)
         local temp1 = Msg:split(" ");
-        local temp2 = temp1[1]:gsub(ScriptData.Prefix, ""):lower()
+        local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
         local CName = temp2;
 
         return Name == CName, CName;
@@ -105,7 +105,7 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
     local Args = Msg:split(" ");
     table.remove(Args, 1);
 
-    for i,Command in pairs(Commands) do
+    for i,Command in pairs(Eurus.Commands) do
         local IsRan = CmdCheck(i);
 
         -- main name
@@ -124,9 +124,56 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
         end
     end
 
-    if not Ran and string.sub(Msg,1,string.len(ScriptData.Prefix))==ScriptData.Prefix then
+    if not Ran and string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then
         Eurus:Notify("Invalid command!")
     end
+end)
+
+Eurus:Notify("EurusLib has loaded.")
+
+Eurus:AddCommand("unload", {
+    "quit",
+    "stopadmin",
+    "exit"
+}, {
+    Description = "Unload the admin."
+}, function()
+    Eurus:Notify("Unloaded admin, goodbye!")
+    for i,Loop in pairs(Eurus.Loops) do
+        Loop:Disconnect()
+        Loop = nil;
+    end
+end)
+
+Eurus:AddCommand("help", {
+    "cmds",
+    "commands",
+    "cmd",
+    "command"
+}, {
+    Description = "Help command, default from EurusLib."
+}, function(Args)
+    local List = "";
+    local temp = 1;
+    for i,Command in pairs(Eurus.Commands) do
+        if Command.Info.Description ~= nil then
+            Eurus:Notify(ScriptData.Prefix..i.." --"..Command.Info.Description,Color3.new(math.random(0,1),1,1),false)
+        else
+            Eurus:Notify(ScriptData.Prefix..i.." --No description provided.",Color3.new(math.random(0,1),1,1),false)
+        end
+    end
+end)
+
+Eurus:AddCommand("prefix", {
+    "setprefix",
+    "setp",
+    "sprefix"
+}, {
+    Description = "Sets the command prefix. Default from EurusLib.";
+    Args = 1;
+}, function(Args)
+    Eurus.ScriptData.Prefix = Args[1]
+    Eurus:Notify("Set prefix to \""..Args[1].."\".", Color3.new(0,1,1), "Info")
 end)
 
 coroutine.wrap(function()
@@ -135,10 +182,10 @@ coroutine.wrap(function()
             if Eurus.RegisteredPlayers[Plr.UserId] ~= nil then
                 if Eurus.Loops[Plr.UserId.."ChatL"] == nil then
                     Eurus.Loops[Plr.UserId.."ChatL"] = Plr.Chatted:Connect(function(Msg)
-                        if not string.sub(Msg,1,string.len(ScriptData.Prefix))==ScriptData.Prefix then return end;
+                        if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
                         local function CmdCheck(Name)
                             local temp1 = Msg:split(" ");
-                            local temp2 = temp1[1]:gsub(ScriptData.Prefix, ""):lower()
+                            local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
                             local CName = temp2;
                     
                             return Name == CName, CName;
@@ -148,7 +195,7 @@ coroutine.wrap(function()
                         local Args = Msg:split(" ");
                         table.remove(Args, 1);
                     
-                        for i,Command in pairs(Commands) do
+                        for i,Command in pairs(Eurus.Commands) do
                             local IsRan = CmdCheck(i);
                     
                             -- main name
@@ -179,7 +226,7 @@ coroutine.wrap(function()
                             end
                         end
                     
-                        if not Ran and string.sub(Msg,1,string.len(ScriptData.Prefix))==ScriptData.Prefix then
+                        if not Ran and string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then
                             Eurus:Notify("Invalid command!")
                         end
                     end)
@@ -188,53 +235,5 @@ coroutine.wrap(function()
         end
     end
 end)()
-
--- Don't edit below if you want the commands: unload, cmds, setprefix
-
-Eurus:AddCommand("unload", {
-    "quit",
-    "stopadmin",
-    "exit"
-}, {
-    Description = "Unload the admin."
-}, function()
-    Notify("Unloaded admin, goodbye!")
-    for i,Loop in pairs(Eurus.Loops) do
-        Loop:Disconnect()
-        Loop = nil;
-    end
-end)
-
-Eurus:AddCommand("help", {
-    "cmds",
-    "commands",
-    "cmd",
-    "command"
-}, {
-    Description = "Help command, default from EurusLib."
-}, function(Args)
-    local List = "";
-    local temp = 1;
-    for i,Command in pairs(Commands) do
-        if Command.Info.Description ~= nil then
-            Notify(ScriptData.Prefix..i.." --"..Command.Info.Description,Color3.new(math.random(0,1),1,1),false)
-        else
-            Notify(ScriptData.Prefix..i.." --No description provided.",Color3.new(math.random(0,1),1,1),false)
-        end
-    end
-end)
-
-Eurus:AddCommand("prefix", {
-    "setprefix",
-    "setp",
-    "sprefix"
-}, {
-    Description = "Sets the command prefix. Default from EurusLib.";
-    Args = 1;
-}, function(Args)
-    ScriptData.Prefix = Args[1]
-    Notify("Set prefix to \""..Args[1].."\".", Color3.new(0,1,1), "Info")
-end)
--- End of default commands.
 
 return Eurus;
