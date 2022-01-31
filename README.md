@@ -23,3 +23,19 @@ Second, set your script data! <optional>
     ScriptName = "Eurus Admin";
   });
 ```
+
+  Lastly, make a command, with the availible functions!
+  
+  ```lua
+    Eurus:AddCommand("ping", {
+      --// Aliases
+      "pong"
+    }, {
+      --// Command metadata
+      Description = "Ping!"
+    }, function(Args)
+      Eurus:Notify"Pong!";
+    end)
+  ```
+  
+ Cheers
