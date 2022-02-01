@@ -92,7 +92,6 @@ function Eurus:Chat(Text, WhisperTo)
 end
 
 Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
-    if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
     local function CmdCheck(Name)
         local temp1 = Msg:split(" ");
         local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
@@ -102,7 +101,11 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
     end
 
     local Ran = false;
-    local Args = Msg:split(" ");
+    local Args = string.split(
+        Msg,
+        " "
+    )
+    
     table.remove(Args, 1);
 
     for i,Command in pairs(Eurus.Commands) do
@@ -111,7 +114,7 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
         -- main name
         if IsRan then
             Ran = true
-            return Command.Run(Args)
+            return Command.Run(localPlayer, Args)
         end
 
         for aNum,Alias in pairs(Command.Aliases) do
@@ -119,7 +122,7 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
 
             if IsRan and not Ran then
                 Ran = true
-                return Command.Run(Args)
+                return Command.Run(Plr, Args)
             end
         end
     end
@@ -129,60 +132,12 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
     end
 end)
 
-Eurus:Notify("EurusLib has loaded.")
-
-Eurus:AddCommand("unload", {
-    "quit",
-    "stopadmin",
-    "exit"
-}, {
-    Description = "Unload the admin."
-}, function()
-    Eurus:Notify("Unloaded admin, goodbye!")
-    for i,Loop in pairs(Eurus.Loops) do
-        Loop:Disconnect()
-        Loop = nil;
-    end
-end)
-
-Eurus:AddCommand("help", {
-    "cmds",
-    "commands",
-    "cmd",
-    "command"
-}, {
-    Description = "Help command, default from EurusLib."
-}, function(Args)
-    local List = "";
-    local temp = 1;
-    for i,Command in pairs(Eurus.Commands) do
-        if Command.Info.Description ~= nil then
-            Eurus:Notify(ScriptData.Prefix..i.." --"..Command.Info.Description,Color3.new(math.random(0,1),1,1),false)
-        else
-            Eurus:Notify(ScriptData.Prefix..i.." --No description provided.",Color3.new(math.random(0,1),1,1),false)
-        end
-    end
-end)
-
-Eurus:AddCommand("prefix", {
-    "setprefix",
-    "setp",
-    "sprefix"
-}, {
-    Description = "Sets the command prefix. Default from EurusLib.";
-    Args = 1;
-}, function(Args)
-    Eurus.ScriptData.Prefix = Args[1]
-    Eurus:Notify("Set prefix to \""..Args[1].."\".", Color3.new(0,1,1), "Info")
-end)
-
 coroutine.wrap(function()
     while game:GetService("RunService").Heartbeat:Wait() do
         for i,Plr in pairs(game.Players:GetPlayers()) do
             if Eurus.RegisteredPlayers[Plr.UserId] ~= nil then
                 if Eurus.Loops[Plr.UserId.."ChatL"] == nil then
                     Eurus.Loops[Plr.UserId.."ChatL"] = Plr.Chatted:Connect(function(Msg)
-                        if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
                         local function CmdCheck(Name)
                             local temp1 = Msg:split(" ");
                             local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
@@ -192,7 +147,10 @@ coroutine.wrap(function()
                         end
                     
                         local Ran = false;
-                        local Args = Msg:split(" ");
+                        local Args = string.split(
+                            Msg,
+                            " "
+                        )
                         table.remove(Args, 1);
                     
                         for i,Command in pairs(Eurus.Commands) do
@@ -201,12 +159,12 @@ coroutine.wrap(function()
                             -- main name
                             if IsRan then
                                 Ran = true
-                                if Command.PermLevel then
+                                if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
                                     if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
-                                        return Command.Run(Args)
+                                        return Command.Run(Plr, Args)
                                     end
                                 else
-                                    return Command.Run(Args)
+                                    return Command.Run(Plr, Args)
                                 end
                             end
                     
@@ -215,19 +173,19 @@ coroutine.wrap(function()
                     
                                 if IsRan and not Ran then
                                     Ran = true
-                                    if Command.PermLevel then
+                                    if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
                                         if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
-                                            return Command.Run(Args)
+                                            return Command.Run(Plr, Args)
                                         end
                                     else
-                                        return Command.Run(Args)
+                                        return Command.Run(Plr, Args)
                                     end
                                 end
                             end
                         end
                     
                         if not Ran and string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then
-                            Eurus:Notify("Invalid command!")
+                            Eurus:Chat("Invalid command!", Plr)
                         end
                     end)
                 end
@@ -235,5 +193,7 @@ coroutine.wrap(function()
         end
     end
 end)()
+
+Eurus:Notify("EurusLib has loaded.", Color3.new(1,1,0), "INFO")
 
 return Eurus;
