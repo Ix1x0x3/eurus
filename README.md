@@ -33,8 +33,8 @@ Eurus:SetScriptData({
   }, {
     --// Command metadata
     Description = "Ping!"
-  }, function(Args)
-    Eurus:Notify"Pong!";
+  }, function(Self, Args)
+    Eurus:Notify"Pong! Hi, "..Self.Name.."!";
   end)
   ```
   
