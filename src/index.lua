@@ -1,7 +1,8 @@
 local localPlayer = game.Players.LocalPlayer;
 local HttpService = game:GetService("HttpService");
 
-local Data = game:HttpGet("");
+local Data = game:HttpGet("https://raw.githubusercontent.com/Ix1x0x3/eurus/main/lib/data.json");
+Data = HttpService:JSONDecode(Data);
 
 local Eurus = {};
 
@@ -204,6 +205,6 @@ game.Players.PlayerAdded:Connect(function(Player)
     end)
 end)
 
-Eurus:Notify("EurusLib b0.4.1 has loaded.", Color3.new(1,1,0), "INFO")
+Eurus:Notify("EurusLib "..(Data.version.beta == true and "b" or "v").."0.3.4", Color3.new(1,1,0), "INFO")
 
 return Eurus;
