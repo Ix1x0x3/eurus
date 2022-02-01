@@ -132,67 +132,73 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
     end
 end)
 
-coroutine.wrap(function()
-    while game:GetService("RunService").Heartbeat:Wait() do
-        for i,Plr in pairs(game.Players:GetPlayers()) do
-            if Eurus.RegisteredPlayers[Plr.UserId] ~= nil then
-                if Eurus.Loops[Plr.UserId.."ChatL"] == nil then
-                    Eurus.Loops[Plr.UserId.."ChatL"] = Plr.Chatted:Connect(function(Msg)
-                        local function CmdCheck(Name)
-                            local temp1 = Msg:split(" ");
-                            local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
-                            local CName = temp2;
-                    
-                            return Name == CName, CName;
-                        end
-                    
-                        local Ran = false;
-                        local Args = string.split(
-                            Msg,
-                            " "
-                        )
-                        table.remove(Args, 1);
-                    
-                        for i,Command in pairs(Eurus.Commands) do
-                            local IsRan = CmdCheck(i);
-                    
-                            -- main name
-                            if IsRan then
-                                Ran = true
-                                if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
-                                    if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
-                                        return Command.Run(Plr, Args)
-                                    end
-                                else
-                                    return Command.Run(Plr, Args)
-                                end
-                            end
-                    
-                            for aNum,Alias in pairs(Command.Aliases) do
-                                IsRan = CmdCheck(Alias)
-                    
-                                if IsRan and not Ran then
-                                    Ran = true
-                                    if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
-                                        if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
-                                            return Command.Run(Plr, Args)
-                                        end
-                                    else
-                                        return Command.Run(Plr, Args)
-                                    end
-                                end
-                            end
-                        end
-                    
-                        if not Ran and string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then
-                            Eurus:Chat("Invalid command!", Plr)
-                        end
-                    end)
+local function AdminChatted(Msg)
+    local function CmdCheck(Name)
+        local temp1 = Msg:split(" ");
+        local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
+        local CName = temp2;
+
+        return Name == CName, CName;
+    end
+
+    local Ran = false;
+    local Args = string.split(
+        Msg,
+        " "
+    )
+    table.remove(Args, 1);
+
+    for i,Command in pairs(Eurus.Commands) do
+        local IsRan = CmdCheck(i);
+
+        -- main name
+        if IsRan then
+            Ran = true
+            if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
+                if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
+                    return Command.Run(Plr, Args)
+                end
+            else
+                return Command.Run(Plr, Args)
+            end
+        end
+
+        for aNum,Alias in pairs(Command.Aliases) do
+            IsRan = CmdCheck(Alias)
+
+            if IsRan and not Ran then
+                Ran = true
+                if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
+                    if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
+                        return Command.Run(Plr, Args)
+                    end
+                else
+                    return Command.Run(Plr, Args)
                 end
             end
         end
     end
-end)()
+
+    if not Ran and string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then
+        Eurus:Chat("Invalid command!", Plr)
+    end
+end
+
+for i,Player in pairs(game.Players:GetPlayers()) do
+    Player.Chatted:Connect(function(Msg)
+        if Eurus.RegisteredPlayers[Player.UserId] ~= nil then
+            AdminChatted(Msg)
+        end
+    end)
+end
+
+game.Players.PlayerAdded:Connect(function(Player)
+    Player.Chatted:Connect(function(Msg)
+        if Eurus.RegisteredPlayers[Player.UserId] ~= nil then
+            AdminChatted(Msg)
+        end
+    end)
+end)
 
 Eurus:Notify("EurusLib has loaded.", Color3.new(1,1,0), "INFO")
 
