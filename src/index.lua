@@ -92,6 +92,7 @@ function Eurus:Chat(Text, WhisperTo)
 end
 
 Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
+    if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
     local function CmdCheck(Name)
         local temp1 = Msg:split(" ");
         local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
@@ -133,6 +134,7 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
 end)
 
 local function AdminChatted(Plr, Msg)
+    if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
     local function CmdCheck(Name)
         local temp1 = Msg:split(" ");
         local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
