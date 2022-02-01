@@ -186,7 +186,7 @@ end
 
 for i,Player in pairs(game.Players:GetPlayers()) do
     Player.Chatted:Connect(function(Msg)
-        if not Eurus.RegisteredPlayers[Player.UserId].Rank == nil then
+        if not Eurus.RegisteredPlayers[Player.UserId] == nil then
             AdminChatted(Player, Msg)
         end
     end)
@@ -194,7 +194,7 @@ end
 
 game.Players.PlayerAdded:Connect(function(Player)
     Player.Chatted:Connect(function(Msg)
-        if not Eurus.RegisteredPlayers[Player.UserId].Rabk == nil then
+        if not Eurus.RegisteredPlayers[Player.UserId] == nil then
             AdminChatted(Player, Msg)
         end
     end)
