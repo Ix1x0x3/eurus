@@ -1,6 +1,8 @@
 local localPlayer = game.Players.LocalPlayer;
 local HttpService = game:GetService("HttpService");
 
+local Data = game:HttpGet("");
+
 local Eurus = {};
 
 Eurus.Commands = {};
