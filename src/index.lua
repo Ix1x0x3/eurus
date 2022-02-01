@@ -80,8 +80,8 @@ function Eurus:AddCommand(Name, Aliases, Info, Code)
 end
 
 function Eurus:RegisterPlayer(Player, Data)
-    if not Player then return Eurus:Notify("An internal error has occured1 Check console to see the error.", Color3.new(1,0,0)) end;
-    Eurus.RegisteredPlayers[Player.UserId] = Data;
+    if not Player then return Eurus:Notify("An internal error has occured! Check console to see the error.", Color3.new(1,0,0)) end;
+    Eurus.RegisteredPlayers[Player] = Data;
 end
 
 function Eurus:Chat(Text, WhisperTo)
@@ -186,7 +186,7 @@ end
 
 for i,Player in pairs(game.Players:GetPlayers()) do
     Player.Chatted:Connect(function(Msg)
-        if Eurus.RegisteredPlayers[Player.UserId] then
+        if Eurus.RegisteredPlayers[Player] ~= nil then
             AdminChatted(Player, Msg)
         end
     end)
@@ -194,7 +194,7 @@ end
 
 game.Players.PlayerAdded:Connect(function(Player)
     Player.Chatted:Connect(function(Msg)
-        if Eurus.RegisteredPlayers[Player.UserId] then
+        if Eurus.RegisteredPlayers[Player] ~= nil then
             AdminChatted(Player, Msg)
         end
     end)
