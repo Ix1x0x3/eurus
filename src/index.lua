@@ -132,7 +132,7 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
     end
 end)
 
-local function AdminChatted(Msg)
+local function AdminChatted(Plr, Msg)
     local function CmdCheck(Name)
         local temp1 = Msg:split(" ");
         local temp2 = temp1[1]:gsub(Eurus.ScriptData.Prefix, ""):lower()
@@ -187,7 +187,7 @@ end
 for i,Player in pairs(game.Players:GetPlayers()) do
     Player.Chatted:Connect(function(Msg)
         if Eurus.RegisteredPlayers[Player.UserId] ~= nil then
-            AdminChatted(Msg)
+            AdminChatted(Player, Msg)
         end
     end)
 end
@@ -195,7 +195,7 @@ end
 game.Players.PlayerAdded:Connect(function(Player)
     Player.Chatted:Connect(function(Msg)
         if Eurus.RegisteredPlayers[Player.UserId] ~= nil then
-            AdminChatted(Msg)
+            AdminChatted(Player, Msg)
         end
     end)
 end)
