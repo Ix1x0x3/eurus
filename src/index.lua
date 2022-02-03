@@ -205,6 +205,6 @@ game.Players.PlayerAdded:Connect(function(Player)
     end)
 end)
 
-pcall(function() Eurus:Notify("EurusLib "..(Data.version.beta == true and "b" or "v").."0.3.4", Color3.new(1,1,0), "INFO") end)
+pcall(function() Eurus:Notify("EurusLib "..(Data.version.beta == true and "b" or "v")..Data.version.majorRel.."."..Data.version.minorRel.."."..Data.version.smallRel, Color3.new(1,1,0), "INFO") end)
 
 return Eurus;
