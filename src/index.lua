@@ -40,13 +40,14 @@ CmdPrompt.Font = Enum.Font.Code;
 CmdPrompt.PlaceholderText = "command here"
 CmdPrompt.TextXAlignment = Enum.TextXAlignment.Left;
 CmdPrompt.TextYAlignment = Enum.TextYAlignment.Center;
+CmdPrompt.TextColor3 = Color3.new(1,1,1)
 
 function Eurus:Notify(Txt, Time, Tag)
-    local NotifGui = game.CoreGui:FindFirstChild("IXADMIN_NGUI");
+    local NotifGui = game.CoreGui:FindFirstChild("EURUS");
 
         if not NotifGui then
             NotifGui = Instance.new("ScreenGui", game.CoreGui);
-            NotifGui.Name = "IXADMIN_NGUI";
+            NotifGui.Name = "EURUS";
         end
 
         local Ntif = Instance.new("TextLabel", NotifGui)
@@ -289,6 +290,7 @@ UserInputService.InputBegan:Connect(function(Input, _)
         if Input.KeyCode == Enum.KeyCode.Semicolon then
             CmdTop.Visible = true
             CmdPrompt:CaptureFocus()
+            CmdPrompt.Text = ""
         end
     end
 end)
@@ -298,6 +300,7 @@ CmdPrompt.FocusLost:Connect(function(e)
         LocalChatted(CmdPrompt.Text)
         CmdPrompt.Text = ""
         CmdTop.Visible = false
+        CmdPrompt:ReleaseFocus()
     end
 end)
 
