@@ -300,8 +300,12 @@ CmdPrompt.FocusLost:Connect(function(e)
         CmdPrompt.Text = ""
         CmdTop.Visible = false
         CmdPrompt:ReleaseFocus()
-        LocalChatted(string.gsub(CmdPrompt.Text, ";", ""))
+        LocalChatted(CmdPrompt.Text)
     end
 end)
+
+coroutine.wrap(function()
+    CmdPrompt.Text = string.gsub(CmdPrompt.Text, ";", "")
+end)()
 
 return Eurus;
