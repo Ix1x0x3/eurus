@@ -1,5 +1,8 @@
 local localPlayer = game.Players.LocalPlayer;
+local LocalizationService = game:GetService("LocalizationService")
+local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService");
+
 
 local Data = game:HttpGet("https://raw.githubusercontent.com/Ix1x0x3/eurus/main/lib/data.json");
 Data = HttpService:JSONDecode(Data);
@@ -11,33 +14,104 @@ Eurus.Commands = {};
 Eurus.ScriptData = {
     FileName = "DATA_SCRIPT.json";
     Prefix = ",";
-    ScriptName = "MyAdmin"
+    ScriptName = "MyAdmin";
+    NotifCache = {}
 }
 
 Eurus.Loops = {};
 
 Eurus.RegisteredPlayers = {};
 
-function Eurus:Notify(Text, Color, TagR)
-    local Tag = Eurus.ScriptData.ScriptName;
-    if TagR then
-        Tag = TagR;
-        if TagR == false then Tag = false; end;
-    end
-    if TagR == false then
-        return game.StarterGui:SetCore("ChatMakeSystemMessage", {
-            Text = Text,
-            Color = Color or Color3.new(1,1,1),
-            Font = Enum.Font.Code,
-            FontSize = Enum.FontSize.Size14
-        })
-    end
-    return game.StarterGui:SetCore("ChatMakeSystemMessage", {
-        Text = "["..Tag.."]: "..Text,
-        Color = Color or Color3.new(1,1,1),
-        Font = Enum.Font.Code,
-        FontSize = Enum.FontSize.Size14
-    })
+-- make cmdbar
+local CmdGui = Instance.new("ScreenGui", game.CoreGui);
+CmdGui.IgnoreGuiInset = true
+local CmdTop = Instance.new("Frame", CmdGui)
+CmdTop.BackgroundColor3 = Color3.fromRGB(22, 20, 14)
+CmdTop.Size = UDim2.new(1, 0, 0.2, 0)
+CmdTop.BorderSizePixel = 0
+CmdTop.Visible = false
+local CmdPrompt = Instance.new("TextBox", CmdTop)
+CmdPrompt.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+CmdPrompt.BackgroundTransparency = 0.7
+CmdPrompt.Position = UDim2.new(0,0,0.13,0)
+CmdPrompt.Size = UDim2.new(1,0,0.87,0)
+CmdPrompt.TextScaled = true;
+CmdPrompt.Font = Enum.Font.Code;
+CmdPrompt.PlaceholderText = "command here"
+CmdPrompt.TextXAlignment = Enum.TextXAlignment.Left;
+CmdPrompt.TextYAlignment = Enum.TextYAlignment.Center;
+
+function Eurus:Notify(Txt, Time, Tag)
+    local NotifGui = game.CoreGui:FindFirstChild("IXADMIN_NGUI");
+
+        if not NotifGui then
+            NotifGui = Instance.new("ScreenGui", game.CoreGui);
+            NotifGui.Name = "IXADMIN_NGUI";
+        end
+
+        local Ntif = Instance.new("TextLabel", NotifGui)
+        Ntif.Position = UDim2.new(0.5, 0, 0.9, 0);
+        Ntif.Size = UDim2.new(1,0,0.25,0);
+        Ntif.TextTransparency = 1;
+        Ntif.Text = Tag and "["..Tag.."] "..Txt or Txt
+        Ntif.BackgroundTransparency = 1;
+        Ntif.Font = Enum.Font.SourceSansSemibold;
+        Ntif.AnchorPoint = Vector2.new(0.5, 0.5)
+        Ntif.TextSize = 32;
+        Ntif.TextColor3 = Color3.new(0.8,0.8,0.8)
+
+        table.insert(Eurus.NotifCache, Ntif)
+
+        game.TweenService:Create(
+            Ntif,
+            TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+            {
+                Position = UDim2.new(0.5,0,0.8-(#Eurus.NotifCache*0.05),0);
+                TextTransparency = 0;
+            }
+        ):Play()
+
+        local CanLeave = false;
+        local IgnoreDelay = false;
+
+        Ntif.MouseEnter:Connect(function()
+            CanLeave = true
+            Ntif.TextColor3 = Color3.new(1,1,1)
+        end)
+
+        Ntif.MouseLeave:Connect(function()
+            CanLeave = false;
+            Ntif.TextColor3 = Color3.new(0.8,0.8,0.8)
+        end)
+
+        localPlayer:GetMouse().Button1Down:Connect(function()
+            if CanLeave then
+                IgnoreDelay = true;
+                game.TweenService:Create(
+                    Ntif,
+                    TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                    {
+                        TextTransparency = 1;
+                        Position = UDim2.new(0.5, 0, 0.9, 0);
+                    }
+                ):Play()
+                table.remove(Eurus.NotifCache, table.find(Eurus.NotifCache, Ntif))
+            end
+        end)
+
+        delay(Time or 5, function()
+            if not IgnoreDelay then
+                game.TweenService:Create(
+                    Ntif,
+                    TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                    {
+                        TextTransparency = 1;
+                        Position = UDim2.new(0.5, 0, 0.9, 0);
+                    }
+                ):Play()
+                table.remove(Eurus.NotifCache, table.find(Eurus.NotifCache, Ntif))
+            end
+        end)
 end
 
 function Eurus:WriteFile(FileName, Data)
@@ -67,7 +141,7 @@ end
 
 function Eurus:ReadGenv(name)
     if not getgenv()[name] then
-        Eurus:Notify('An internal error has occured! Check console to see the error.',Color3.new(1,0,0))
+        Eurus:Notify('An internal error has occured! Check console to see the error.', 5, "Eurus")
         return print("ReadGenv has failed: "..name.." does not exist in genv.")
     end
 
@@ -83,7 +157,7 @@ function Eurus:AddCommand(Name, Aliases, Info, Code)
 end
 
 function Eurus:RegisterPlayer(Player, Data)
-    if not Player then return Eurus:Notify("An internal error has occured! Check console to see the error.", Color3.new(1,0,0)) end;
+    if not Player then return Eurus:Notify("An internal error has occured! Check console to see the error.", 5, "Eurus") end;
     Eurus.RegisteredPlayers[Player] = Data;
 end
 
@@ -94,7 +168,7 @@ function Eurus:Chat(Text, WhisperTo)
     return game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(Text, "All") -- sends your message to all players
 end
 
-Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
+function LocalChatted(Msg)
     if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
     local function CmdCheck(Name)
         local temp1 = Msg:split(" ");
@@ -126,15 +200,17 @@ Eurus.Loops.ChatL = localPlayer.Chatted:Connect(function(Msg)
 
             if IsRan and not Ran then
                 Ran = true
-                return Command.Run(Plr, Args)
+                return Command.Run(localPlayer, Args)
             end
         end
     end
 
     if not Ran and string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then
-        Eurus:Notify("Invalid command!")
+        Eurus:Notify("Invalid command!", 5, "Eurus")
     end
-end)
+end
+
+Eurus.Loops.ChatL = localPlayer.Chatted:Connect(LocalChatted)
 
 local function AdminChatted(Plr, Msg)
     if not string.sub(Msg,1,string.len(Eurus.ScriptData.Prefix))==Eurus.ScriptData.Prefix then return end;
@@ -205,6 +281,24 @@ game.Players.PlayerAdded:Connect(function(Player)
     end)
 end)
 
-pcall(function() Eurus:Notify("EurusLib "..(Data.version.beta == true and "b" or "v")..Data.version.majorRel.."."..Data.version.minorRel.."."..Data.version.smallRel, Color3.new(1,1,0), "INFO") end)
+pcall(function() Eurus:Notify("EurusLib "..(Data.version.beta == true and "b" or "v")..Data.version.majorRel.."."..Data.version.minorRel.."."..Data.version.smallRel, 5, "Eurus") end)
+
+-- cmd bar
+UserInputService.InputBegan:Connect(function(Input, _)
+    if not _ then
+        if Input.KeyCode == Enum.KeyCode.Semicolon then
+            CmdTop.Visible = true
+            CmdPrompt:CaptureFocus()
+        end
+    end
+end)
+
+CmdPrompt.FocusLost:Connect(function(e)
+    if e and CmdTop.Visible then
+        LocalChatted(CmdPrompt.Text)
+        CmdPrompt.Text = ""
+        CmdTop.Visible = false
+    end
+end)
 
 return Eurus;
