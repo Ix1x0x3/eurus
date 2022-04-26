@@ -297,10 +297,10 @@ end)
 
 CmdPrompt.FocusLost:Connect(function(e)
     if e and CmdTop.Visible then
-        LocalChatted(CmdPrompt.Text)
         CmdPrompt.Text = ""
         CmdTop.Visible = false
         CmdPrompt:ReleaseFocus()
+        LocalChatted(string.gsub(CmdPrompt.Text, ";", ""))
     end
 end)
 
