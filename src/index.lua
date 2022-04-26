@@ -1,6 +1,7 @@
 local localPlayer = game.Players.LocalPlayer;
 local LocalizationService = game:GetService("LocalizationService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService");
 
 
@@ -305,7 +306,9 @@ CmdPrompt.FocusLost:Connect(function(e)
 end)
 
 coroutine.wrap(function()
-    CmdPrompt.Text = string.gsub(CmdPrompt.Text, ";", "")
+    RunService.Heartbeat:Connect(function()
+        CmdPrompt.Text = string.gsub(CmdPrompt.Text, ";", "")
+    end)
 end)()
 
 return Eurus;
