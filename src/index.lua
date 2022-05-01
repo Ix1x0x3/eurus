@@ -53,6 +53,7 @@ CmdPromptPredict.TextXAlignment = Enum.TextXAlignment.Left;
 CmdPromptPredict.TextColor3 = Color3.new(1,1,1)
 CmdPromptPredict.TextYAlignment = Enum.TextYAlignment.Center;
 CmdPromptPredict.TextTransparency = 0.5
+CmdPromptPredict.Text = "";
 
 function Eurus:Notify(Txt, Time, Tag)
     local NotifGui = game.CoreGui:FindFirstChild("EURUS");
@@ -329,14 +330,14 @@ coroutine.wrap(function()
                     return name
                 end
             end
+        end
 
-            local predicted = Check(CmdPrompt.Text)
+        local predicted = Check(CmdPrompt.Text)
 
-            if predicted then
-                CmdPromptPredict.Text = predicted
-            else
-                CmdPromptPredict.Text = ""
-            end
+        if predicted then
+            CmdPromptPredict.Text = predicted
+        else
+            CmdPromptPredict.Text = ""
         end
     end)
 end)()
