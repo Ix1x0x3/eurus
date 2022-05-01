@@ -151,6 +151,8 @@ function Eurus:ReadGenv(name)
 end
 
 function Eurus:AddCommand(Name, Aliases, Info, Code)
+    print(Code, Name, Aliases, Info)
+	
     Eurus.Commands[Name] = {
         Aliases = Aliases;
         Info = Info;
