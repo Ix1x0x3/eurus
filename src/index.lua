@@ -307,6 +307,12 @@ UserInputService.InputBegan:Connect(function(Input, _)
             CmdPrompt:CaptureFocus()
             CmdPrompt.Text = ""
         end
+
+        if Input.KeyCode == Enum.KeyCode.Tab then
+            if CmdPromptPredict.Text ~= "" then
+                CmdPrompt.Text = CmdPromptPredict.Text
+            end
+        end
     end
 end)
 
@@ -337,6 +343,10 @@ coroutine.wrap(function()
         if predicted then
             CmdPromptPredict.Text = predicted
         else
+            CmdPromptPredict.Text = ""
+        end
+
+        if CmdPrompt.Text == "" then
             CmdPromptPredict.Text = ""
         end
     end)
