@@ -23,6 +23,9 @@ Eurus.Loops = {};
 
 Eurus.RegisteredPlayers = {};
 
+Eurus.RawCommandRan = Instance.new("BindableEvent");
+Eurus.CommandRan = Eurus.RawCommandRan.Event
+
 -- make cmdbar
 local CmdGui = Instance.new("ScreenGui", game.CoreGui);
 CmdGui.IgnoreGuiInset = true
@@ -42,6 +45,18 @@ CmdPrompt.PlaceholderText = "command here"
 CmdPrompt.TextXAlignment = Enum.TextXAlignment.Left;
 CmdPrompt.TextYAlignment = Enum.TextYAlignment.Center;
 CmdPrompt.TextColor3 = Color3.new(1,1,1)
+local CmdPromptPredict = Instance.new("TextLabel", CmdTop)
+CmdPromptPredict.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+CmdPromptPredict.BackgroundTransparency = 0.7
+CmdPromptPredict.Position = UDim2.new(0,0,0.13,0)
+CmdPromptPredict.Size = UDim2.new(1,0,0.87,0)
+CmdPromptPredict.TextScaled = true;
+CmdPromptPredict.Font = Enum.Font.Code;
+CmdPromptPredict.TextXAlignment = Enum.TextXAlignment.Left;
+CmdPromptPredict.TextColor3 = Color3.new(1,1,1)
+CmdPromptPredict.TextYAlignment = Enum.TextYAlignment.Center;
+CmdPromptPredict.TextTransparency = 0.5
+CmdPromptPredict.Text = "";
 
 function Eurus:Notify(Txt, Time, Tag)
     local NotifGui = game.CoreGui:FindFirstChild("EURUS");
@@ -196,6 +211,7 @@ function LocalChatted(Msg)
         -- main name
         if IsRan then
             Ran = true
+            Eurus.RawCommandRan:Fire(localPlayer, i, Args)
             return Command.Run(localPlayer, Args)
         end
 
@@ -204,6 +220,7 @@ function LocalChatted(Msg)
 
             if IsRan and not Ran then
                 Ran = true
+		Eurus.RawCommandRan:Fire(localPlayer, i, Args)
                 return Command.Run(localPlayer, Args)
             end
         end
@@ -241,9 +258,11 @@ local function AdminChatted(Plr, Msg)
             Ran = true
             if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
                 if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
+		    Eurus.RawCommandRan:Fire(localPlayer, i, Args)
                     return Command.Run(Plr, Args)
                 end
             else
+		Eurus.RawCommandRan:Fire(localPlayer, i, Args)
                 return Command.Run(Plr, Args)
             end
         end
@@ -255,9 +274,11 @@ local function AdminChatted(Plr, Msg)
                 Ran = true
                 if Command.PermLevel and Eurus.RegisteredPlayers[Plr.UserId].Rank then
                     if Eurus.RegisteredPlayers[Plr.UserId].Rank >= Command.PermLevel then
+			Eurus.RawCommandRan:Fire(localPlayer, i, Args)
                         return Command.Run(Plr, Args)
                     end
                 else
+		    Eurus.RawCommandRan:Fire(localPlayer, i, Args)
                     return Command.Run(Plr, Args)
                 end
             end
@@ -295,6 +316,12 @@ UserInputService.InputBegan:Connect(function(Input, _)
             CmdPrompt:CaptureFocus()
             CmdPrompt.Text = ""
         end
+
+        if Input.KeyCode == Enum.KeyCode.Tab then
+            if CmdPromptPredict.Text ~= "" then
+                CmdPrompt.Text = CmdPromptPredict.Text
+            end
+        end
     end
 end)
 
@@ -310,6 +337,33 @@ end)
 coroutine.wrap(function()
     RunService.Heartbeat:Connect(function()
         CmdPrompt.Text = string.gsub(CmdPrompt.Text, ";", "")
+
+        -- find commands matching text in cmdprompt
+        local function Check(str)
+            for name, cmd in pairs(Eurus.Commands) do
+                if (name:lower()):match(str) then
+                    return name
+                end
+
+                for alias, _ in pairs(cmd.Aliases) do
+                    if (alias:lower()):match(str) then
+                        return alias
+                    end
+                end
+            end
+		end
+
+        local predicted = Check(CmdPrompt.Text)
+
+        if predicted then
+            CmdPromptPredict.Text = predicted
+        else
+            CmdPromptPredict.Text = ""
+        end
+
+        if CmdPrompt.Text == "" then
+            CmdPromptPredict.Text = ""
+        end
     end)
 end)()
 
