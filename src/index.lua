@@ -23,6 +23,9 @@ Eurus.Loops = {};
 
 Eurus.RegisteredPlayers = {};
 
+Eurus.RawCommandRan = Instance.new("BindableEvent");
+Eurus.CommandRan = Eurus.RawCommandRan.Event
+
 -- make cmdbar
 local CmdGui = Instance.new("ScreenGui", game.CoreGui);
 CmdGui.IgnoreGuiInset = true
@@ -208,6 +211,7 @@ function LocalChatted(Msg)
         -- main name
         if IsRan then
             Ran = true
+            Eurus.RawCommandRan:Fire(localPlayer, i, Args)
             return Command.Run(localPlayer, Args)
         end
 
