@@ -344,12 +344,6 @@ coroutine.wrap(function()
                 if (name:lower()):match(str) then
                     return name
                 end
-
-                for _, alias in pairs(cmd.Aliases) do
-                    if (alias:lower()):match(str) then
-                        return alias
-                    end
-                end
             end
 		end
 
