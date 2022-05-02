@@ -345,7 +345,7 @@ coroutine.wrap(function()
                     return name
                 end
 
-                for alias, _ in pairs(cmd.Aliases) do
+                for _, alias in pairs(cmd.Aliases) do
                     if (alias:lower()):match(str) then
                         return alias
                     end
